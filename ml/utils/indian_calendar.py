@@ -3,6 +3,7 @@
 # Used by both feature engineering and Prophet forecaster.
 
 from datetime import date, timedelta
+import pandas as pd
 
 # Approximate dates for recurring Indian holidays.
 # Format: (month, day) — year-independent.
