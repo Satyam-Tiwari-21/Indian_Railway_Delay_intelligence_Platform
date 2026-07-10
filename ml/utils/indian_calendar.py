@@ -23,8 +23,6 @@ INDIAN_HOLIDAYS: dict[str, list[tuple[int, int]]] = {
     "Christmas":       [(12, 25)],
     "New Year Eve":    [(12, 31)],
 }
-
-
 def get_holidays_for_year(year: int) -> list[dict]:
     """
     Return a list of holiday dicts for a given year.
