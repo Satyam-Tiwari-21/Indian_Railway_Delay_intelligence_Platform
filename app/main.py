@@ -19,7 +19,13 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.add_middleware(CORSMiddleware, allow_origins=settings.CORS_ORIGINS, ...)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth.router,        prefix="/api/v1/auth",       tags=["Auth"])
 app.include_router(analytics.router,   prefix="/api/v1/analytics",  tags=["Analytics"])
