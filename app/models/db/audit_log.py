@@ -3,6 +3,7 @@
 from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
+from sqlalchemy import ForeignKey
 
 from sqlalchemy import (
     BigInteger, DateTime, Integer,
