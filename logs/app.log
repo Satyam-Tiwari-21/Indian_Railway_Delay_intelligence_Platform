@@ -2,3 +2,12 @@
 2026-07-11 14:19:32 | INFO     | app.core.logging_config        | [2m2026-07-11T08:49:32.074423Z[0m [[32m[1minfo     [0m] [1mLogging initialized           [0m [[0m[1m[34mapp.core.logging_config[0m][0m [36menvironment[0m=[35mdevelopment[0m [36mlog_dir[0m=[35mlogs[0m [36mlog_level[0m=[35mINFO[0m
 2026-07-11 14:25:01 | INFO     | app.core.logging_config        | [2m2026-07-11T08:55:01.799046Z[0m [[32m[1minfo     [0m] [1mLogging initialized           [0m [[0m[1m[34mapp.core.logging_config[0m][0m [36menvironment[0m=[35mdevelopment[0m [36mlog_dir[0m=[35mlogs[0m [36mlog_level[0m=[35mINFO[0m
 2026-07-11 14:30:19 | INFO     | app.core.logging_config        | [2m2026-07-11T09:00:19.020866Z[0m [[32m[1minfo     [0m] [1mLogging initialized           [0m [[0m[1m[34mapp.core.logging_config[0m][0m [36menvironment[0m=[35mdevelopment[0m [36mlog_dir[0m=[35mlogs[0m [36mlog_level[0m=[35mINFO[0m
+2026-07-11 14:31:14 | INFO     | app.core.logging_config        | [2m2026-07-11T09:01:14.516771Z[0m [[32m[1minfo     [0m] [1mLogging initialized           [0m [[0m[1m[34mapp.core.logging_config[0m][0m [36menvironment[0m=[35mdevelopment[0m [36mlog_dir[0m=[35mlogs[0m [36mlog_level[0m=[35mINFO[0m
+2026-07-11 14:32:12 | INFO     | app.core.logging_config        | [2m2026-07-11T09:02:12.597649Z[0m [[32m[1minfo     [0m] [1mLogging initialized           [0m [[0m[1m[34mapp.core.logging_config[0m][0m [36menvironment[0m=[35mdevelopment[0m [36mlog_dir[0m=[35mlogs[0m [36mlog_level[0m=[35mINFO[0m
+2026-07-11 14:32:13 | WARNING  | passlib.handlers.bcrypt        | (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "E:\projects\Indian_Railway_Delay_intelligence_Platform\.venv\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2026-07-11 14:33:22 | INFO     | app.core.logging_config        | [2m2026-07-11T09:03:22.380395Z[0m [[32m[1minfo     [0m] [1mLogging initialized           [0m [[0m[1m[34mapp.core.logging_config[0m][0m [36menvironment[0m=[35mdevelopment[0m [36mlog_dir[0m=[35mlogs[0m [36mlog_level[0m=[35mINFO[0m
