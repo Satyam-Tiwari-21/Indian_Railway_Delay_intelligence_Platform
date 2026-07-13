@@ -94,7 +94,7 @@ def generate_synthetic_data(n_rows: int = 50_000) -> pd.DataFrame:
 
     records = []
     for _ in range(n_rows):
-        journey_date = np.random.choice(dates)
+        journey_date = pd.Timestamp(np.random.choice(dates))
         month = journey_date.month
         dow   = journey_date.dayofweek
         train = trains[np.random.randint(len(trains))]
