@@ -2,27 +2,33 @@
 # Pure crypto functions — no FastAPI, no DB dependencies.
 # Imported by deps.py and auth_service.py.
 
+# app/core/security.py
+
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.core.config import settings
 
-# bcrypt — 12 rounds ≈ 300ms per hash. Good balance of security vs speed.
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def get_password_hash(password: str) -> str:
-    """Hash a plain-text password. Call at user creation and password reset."""
-    return pwd_context.hash(password)
+    """Hash password using bcrypt directly — no passlib."""
+    pwd_bytes = password.encode("utf-8")
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a plain-text password against its bcrypt hash."""
-    return pwd_context.verify(plain_password, hashed_password)
-
+    """Verify password using bcrypt directly — no passlib."""
+    try:
+        return bcrypt.checkpw(
+            plain_password.encode("utf-8"),
+            hashed_password.encode("utf-8")
+        )
+    except Exception:
+        return False
 
 def create_access_token(
     data: dict[str, Any],
