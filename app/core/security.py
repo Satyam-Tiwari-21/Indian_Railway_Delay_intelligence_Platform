@@ -80,5 +80,5 @@ def create_token_pair(user_id: str, username: str, role: str) -> dict[str, Any]:
         "access_token": create_access_token(payload),
         "refresh_token": create_refresh_token(payload),
         "token_type": "bearer",
-        "expires_in": settings.ACCESS_TOKEN_EXPIRE_SECONDS,
+        "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     }
