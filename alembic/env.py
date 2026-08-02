@@ -55,16 +55,19 @@ except Exception as e:
 try:
     from app.core.database import Base  # noqa: F401
 
-    # Phase 2: uncomment as you implement each model
-    # from app.models.db.user import User, Role          # noqa: F401
-    # from app.models.db.station import Station          # noqa: F401
-    # from app.models.db.train import Train              # noqa: F401
-    # from app.models.db.route import Route              # noqa: F401
-    # from app.models.db.delay_record import DelayRecord # noqa: F401
-    # from app.models.db.prediction import Prediction    # noqa: F401
-    # from app.models.db.anomaly import Anomaly          # noqa: F401
-    # from app.models.db.report import Report            # noqa: F401
-    # from app.models.db.audit_log import AuditLog       # noqa: F401
+    # All models are implemented — every one MUST be imported here so its
+    # table registers with Base.metadata, otherwise autogenerate sees an
+    # empty schema and either produces a blank migration or tries to DROP
+    # tables it doesn't know about.
+    from app.models.db.user import User, Role          # noqa: F401
+    from app.models.db.station import Station          # noqa: F401
+    from app.models.db.train import Train              # noqa: F401
+    from app.models.db.route import Route              # noqa: F401
+    from app.models.db.delay_record import DelayRecord # noqa: F401
+    from app.models.db.prediction import Prediction    # noqa: F401
+    from app.models.db.anomaly import Anomaly          # noqa: F401
+    from app.models.db.report import Report            # noqa: F401
+    from app.models.db.audit_log import AuditLog       # noqa: F401
 
     target_metadata = Base.metadata
 
