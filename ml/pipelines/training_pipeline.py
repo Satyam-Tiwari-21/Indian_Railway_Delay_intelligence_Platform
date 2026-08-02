@@ -82,8 +82,52 @@ def run_training(
     7. Log to MLflow
     8. Save best model (XGBoost) to disk
     """
-    import mlflow
-    import mlflow.sklearn
+    if use_mlflow:
+        import mlflow
+        import mlflow.sklearn
+    else:
+        # --no-mlflow was passed but the rest of this function calls
+        # mlflow.start_run()/.log_param()/.log_metrics() unconditionally.
+        # Swap in a no-op stand-in so training works without mlflow
+        # installed at all, instead of failing on `import mlflow` even
+        # when the caller explicitly opted out of it.
+        import contextlib
+
+        class _NoOpMLflow:
+            class _FakeRunInfo:
+                run_id = "no-mlflow"
+
+            class _FakeRun:
+                info = None  # set below
+
+            @staticmethod
+            def start_run(*a, **k):
+                run = _NoOpMLflow._FakeRun()
+                run.info = _NoOpMLflow._FakeRunInfo()
+                return contextlib.nullcontext(run)
+
+            @staticmethod
+            def log_param(*a, **k):
+                pass
+
+            @staticmethod
+            def log_metrics(*a, **k):
+                pass
+
+            @staticmethod
+            def set_tracking_uri(*a, **k):
+                pass
+
+            @staticmethod
+            def set_experiment(*a, **k):
+                pass
+
+            class sklearn:
+                @staticmethod
+                def log_model(*a, **k):
+                    pass
+
+        mlflow = _NoOpMLflow()
 
     from app.core.config import settings
     from ml.pipelines.feature_pipeline import load_from_db, prepare_features
