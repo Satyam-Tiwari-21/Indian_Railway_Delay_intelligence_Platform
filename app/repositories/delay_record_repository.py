@@ -4,13 +4,19 @@
 from datetime import date
 from typing import Optional
 
-from sqlalchemy import and_, case, func, select, text
+from sqlalchemy import and_, case, func, select, text, Numeric, cast
 from sqlalchemy.orm import Session
 
 from app.models.db.delay_record import DelayRecord
 from app.models.db.train import Train
 from app.models.db.station import Station
 from app.repositories.base_repository import BaseRepository
+
+
+# Postgres's round(x, N) only has an overload for `numeric`, not the `double precision`
+# that avg()/percentile_cont()/float division return. Cast first, always.
+def _round(expr, decimals):
+    return func.round(cast(expr, Numeric), decimals)
 
 
 class DelayRecordRepository(BaseRepository[DelayRecord]):
@@ -32,8 +38,8 @@ class DelayRecordRepository(BaseRepository[DelayRecord]):
         stmt = (
             select(
                 func.count().label("total_records"),
-                func.round(func.avg(DelayRecord.arrival_delay_minutes), 2).label("avg_delay"),
-                func.round(
+                _round(func.avg(DelayRecord.arrival_delay_minutes), 2).label("avg_delay"),
+                _round(
                     func.sum(
                         case(
                             (DelayRecord.arrival_delay_minutes <= 5, 1),
@@ -63,7 +69,7 @@ class DelayRecordRepository(BaseRepository[DelayRecord]):
         stmt = (
             select(
                 Train.zone,
-                func.round(func.avg(DelayRecord.arrival_delay_minutes), 2).label("avg_delay"),
+                _round(func.avg(DelayRecord.arrival_delay_minutes), 2).label("avg_delay"),
             )
             .join(Train, DelayRecord.train_id == Train.id)
             .where(DelayRecord.actual_arrival.is_not(None))
@@ -106,13 +112,13 @@ class DelayRecordRepository(BaseRepository[DelayRecord]):
                 Train.zone,
                 origin.c.station_code.label("origin_code"),
                 dest.c.station_code.label("destination_code"),
-                func.round(func.avg(DelayRecord.arrival_delay_minutes), 1).label("avg_delay"),
-                func.round(
+                _round(func.avg(DelayRecord.arrival_delay_minutes), 1).label("avg_delay"),
+                _round(
                     func.percentile_cont(0.5).within_group(
                         DelayRecord.arrival_delay_minutes
                     ), 1
                 ).label("median_delay"),
-                func.round(
+                _round(
                     func.sum(case((DelayRecord.arrival_delay_minutes <= 5, 1), else_=0)).cast(Float)
                     / func.count() * 100, 1
                 ).label("otp_percentage"),
@@ -160,13 +166,13 @@ class DelayRecordRepository(BaseRepository[DelayRecord]):
         stmt = (
             select(
                 Train.zone,
-                func.round(func.avg(DelayRecord.arrival_delay_minutes), 2).label("avg_delay"),
-                func.round(
+                _round(func.avg(DelayRecord.arrival_delay_minutes), 2).label("avg_delay"),
+                _round(
                     func.sum(case((DelayRecord.arrival_delay_minutes <= 5, 1), else_=0)).cast(Float)
                     / func.count() * 100, 2
                 ).label("otp_percentage"),
                 func.count().label("total_records"),
-                func.round(
+                _round(
                     func.percentile_cont(0.9).within_group(DelayRecord.arrival_delay_minutes), 1
                 ).label("p90_delay"),
                 func.sum(
@@ -190,8 +196,8 @@ class DelayRecordRepository(BaseRepository[DelayRecord]):
         stmt = (
             select(
                 func.extract("month", DelayRecord.journey_date).label("month"),
-                func.round(func.avg(DelayRecord.arrival_delay_minutes), 2).label("avg_delay"),
-                func.round(
+                _round(func.avg(DelayRecord.arrival_delay_minutes), 2).label("avg_delay"),
+                _round(
                     func.sum(case((DelayRecord.arrival_delay_minutes <= 5, 1), else_=0)).cast(Float)
                     / func.count() * 100, 2
                 ).label("otp_percentage"),
@@ -238,7 +244,7 @@ class DelayRecordRepository(BaseRepository[DelayRecord]):
                 Station.station_code,
                 Station.name.label("station_name"),
                 Station.zone,
-                func.round(func.avg(DelayRecord.departure_delay_minutes), 2).label("avg_departure_delay"),
+                _round(func.avg(DelayRecord.departure_delay_minutes), 2).label("avg_departure_delay"),
                 func.count().label("total_train_passes"),
             )
             .join(Station, DelayRecord.station_id == Station.id)
@@ -273,7 +279,7 @@ class DelayRecordRepository(BaseRepository[DelayRecord]):
                 Station.name.label("station_name"),
                 Station.latitude,
                 Station.longitude,
-                func.round(func.avg(DelayRecord.arrival_delay_minutes), 1).label("value"),
+                _round(func.avg(DelayRecord.arrival_delay_minutes), 1).label("value"),
                 func.count(func.distinct(DelayRecord.train_id)).label("total_trains"),
             )
             .join(Station, DelayRecord.station_id == Station.id)
