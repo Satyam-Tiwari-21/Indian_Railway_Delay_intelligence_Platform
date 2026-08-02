@@ -120,6 +120,7 @@ def generate_synthetic_data(n_rows: int = 50_000) -> pd.DataFrame:
 
         # Add noise
         delay = max(-15, int(np.random.normal(base, base * 0.4)))
+        departure_delay = max(0, delay - np.random.randint(0, 5))
 
         reason_code = None
         if delay > 60:
@@ -127,6 +128,17 @@ def generate_synthetic_data(n_rows: int = 50_000) -> pd.DataFrame:
             elif month in (12, 1):       reason_code = "FOG"
             elif np.random.random() < 0.3: reason_code = "SIGNAL_FAIL"
             else:                          reason_code = "LATE_RUNNING"
+
+        # Scheduled/actual timestamps — every analytics query filters on
+        # actual_arrival IS NOT NULL to mean "this journey has completed",
+        # so these MUST be populated, not just the *_delay_minutes columns.
+        scheduled_arrival = journey_date + pd.Timedelta(
+            hours=int(np.random.randint(0, 24)),
+            minutes=int(np.random.choice([0, 15, 30, 45])),
+        )
+        actual_arrival = scheduled_arrival + pd.Timedelta(minutes=int(delay))
+        scheduled_departure = scheduled_arrival + pd.Timedelta(minutes=int(np.random.randint(2, 10)))
+        actual_departure = scheduled_departure + pd.Timedelta(minutes=int(departure_delay))
 
         records.append({
             "train_number":            train[0],
@@ -138,8 +150,12 @@ def generate_synthetic_data(n_rows: int = 50_000) -> pd.DataFrame:
             "station_code":            station[0],
             "station_name":            station[1],
             "journey_date":            journey_date.date(),
+            "scheduled_arrival":       scheduled_arrival.to_pydatetime(),
+            "actual_arrival":          actual_arrival.to_pydatetime(),
+            "scheduled_departure":     scheduled_departure.to_pydatetime(),
+            "actual_departure":        actual_departure.to_pydatetime(),
             "arrival_delay_minutes":   delay,
-            "departure_delay_minutes": max(0, delay - np.random.randint(0, 5)),
+            "departure_delay_minutes": departure_delay,
             "reason_code":             reason_code,
             "weather_condition":       "HEAVY_RAIN" if month in (7, 8) else "FOG" if month in (12, 1) else "CLEAR",
             "data_source":             "synthetic",
@@ -247,6 +263,10 @@ def insert_delay_records(
             "train_id":                tid,
             "station_id":              sid,
             "journey_date":            row.get("journey_date"),
+            "scheduled_arrival":       row.get("scheduled_arrival"),
+            "actual_arrival":          row.get("actual_arrival"),
+            "scheduled_departure":     row.get("scheduled_departure"),
+            "actual_departure":        row.get("actual_departure"),
             "arrival_delay_minutes":   row.get("arrival_delay_minutes"),
             "departure_delay_minutes": row.get("departure_delay_minutes"),
             "reason_code":             row.get("reason_code"),
