@@ -6,12 +6,19 @@
 from datetime import date, timedelta
 from typing import Optional
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, Numeric, cast
 from sqlalchemy.orm import Session
 
 from app.core.logging_config import get_logger
 from app.models.db.delay_record import DelayRecord
 from app.models.db.train import Train
+
+
+# Postgres's round(x, N) only has an overload for `numeric`, not the `double precision`
+# that avg()/percentile_cont()/float division return. Cast first, always.
+def _round(expr, decimals):
+    return func.round(cast(expr, Numeric), decimals)
+
 
 logger = get_logger(__name__)
 
@@ -35,7 +42,7 @@ def _get_zone_history(db: Session, zone: str, days: int = 90) -> list[dict]:
     rows = db.execute(
         select(
             DelayRecord.journey_date.label("dt"),
-            func.round(func.avg(DelayRecord.arrival_delay_minutes), 1).label("avg_delay"),
+            _round(func.avg(DelayRecord.arrival_delay_minutes), 1).label("avg_delay"),
         )
         .join(Train, DelayRecord.train_id == Train.id)
         .where(Train.zone == zone)
@@ -136,7 +143,7 @@ def get_route_forecast(
     rows = db.execute(
         select(
             DelayRecord.journey_date.label("dt"),
-            func.round(func.avg(DelayRecord.arrival_delay_minutes), 1).label("avg_delay"),
+            _round(func.avg(DelayRecord.arrival_delay_minutes), 1).label("avg_delay"),
         )
         .where(DelayRecord.train_id == train.id)
         .where(DelayRecord.journey_date >= cutoff)
